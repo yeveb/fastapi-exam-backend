@@ -2,9 +2,8 @@
 import requests
 from datetime import datetime
 
-# Burası kendi Supabase API bilgilerinle değiştirilecek
 SUPABASE_URL = "https://pvunkmlhgnqjryveftie.supabase.co/rest/v1/exam_responses"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2dW5rbWxoZ25xanJ5dmVmdGllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTM5MzYyMiwiZXhwIjoyMDYwOTY5NjIyfQ.FaB-Y0nyvAPsyAuasOw3n2I2yiQE5OKdFKqMArQuqBw"  # Bunu kendi keyinle değiştir.
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2dW5rbWxoZ25xanJ5dmVmdGllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTM5MzYyMiwiZXhwIjoyMDYwOTY5NjIyfQ.FaB-Y0nyvAPsyAuasOw3n2I2yiQE5OKdFKqMArQuqBw"
 
 def submit_exam_response(form_data: dict) -> bool:
     headers = {
@@ -17,7 +16,20 @@ def submit_exam_response(form_data: dict) -> bool:
     form_data["created_at"] = datetime.utcnow().isoformat()
 
     try:
-        response = requests.post(SUPABASE_URL, headers=headers, json=form_data)
+        # form_data içinden gerekli alanları ayıklıyoruz
+        payload = {
+            "exam_key": form_data.get("exam_key"),
+            "exam_name": form_data.get("exam_name"),
+            "group": form_data.get("group"),
+            "ad_soyad": form_data.get("form_data", {}).get("ad_soyad"),
+            "ogr_no": form_data.get("form_data", {}).get("ogr_no"),
+            "email": form_data.get("form_data", {}).get("email"),
+            "sinif": form_data.get("form_data", {}).get("sinif"),
+            "form_data": form_data.get("form_data"),
+            "created_at": form_data.get("created_at"),
+        }
+
+        response = requests.post(SUPABASE_URL, headers=headers, json=payload)
         print("🔍 Supabase Response:", response.status_code, response.text)
 
         if response.status_code == 201:
