@@ -18,7 +18,7 @@ app.add_middleware(
 
 # Formdan gelen verinin yapısını tanımlıyoruz
 class ResponseData(BaseModel):
-    user_id: str
+    exam_key: str
     exam_name: str
     group: str
     form_data: dict
