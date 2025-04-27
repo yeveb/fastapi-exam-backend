@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from supabase_submitter import submit_exam_response
 from fastapi.responses import JSONResponse
+from datetime import datetime
 
 app = FastAPI()
 
@@ -27,6 +28,11 @@ class ResponseData(BaseModel):
 @app.post("/submit_response")
 async def submit_response(request: Request):
     form_data = await request.json()
+    
+    # Eğer created_at yoksa burada ekleyelim
+    if "created_at" not in form_data:
+        form_data["created_at"] = datetime.utcnow().isoformat()
+    
     success = submit_exam_response(form_data)
 
     if success:
