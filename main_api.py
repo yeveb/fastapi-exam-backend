@@ -1,5 +1,6 @@
-# main_api.py
-from fastapi import FastAPI, Request
+# 2. main_api.py - Düzenlenmiş Hali
+
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from supabase_submitter import submit_exam_response
@@ -17,25 +18,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Formdan gelen verinin yapısını tanımlıyoruz
+# Gelen verinin doğru şekilde yapılandırılması için ResponseData modeli
+class FormDataModel(BaseModel):
+    ad_soyad: str
+    ogr_no: str
+    email: str
+    sinif: str
+    cevaplar: dict
+
 class ResponseData(BaseModel):
     exam_key: str
     exam_name: str
     group: str
-    form_data: dict
+    created_at: str = None  # Varsayılan olarak None, eksikse ekleyeceğiz
+    form_data: FormDataModel
 
-# Form verilerini Supabase'a gönderecek endpoint
 @app.post("/submit_response")
 async def submit_response(request: Request):
-    form_data = await request.json()
-    
-    # Eğer created_at yoksa burada ekleyelim
-    if "created_at" not in form_data:
-        form_data["created_at"] = datetime.utcnow().isoformat()
-    
-    success = submit_exam_response(form_data)
+    try:
+        incoming_data = await request.json()
+        data = ResponseData(**incoming_data)
 
-    if success:
-        return JSONResponse(content={"status": "ok", "message": "Kayıt başarıyla tamamlandı."})
-    else:
-        return JSONResponse(content={"status": "error", "message": "Supabase kayıt hatası."})
+        # Eğer created_at eksikse tamamla
+        if not data.created_at:
+            data.created_at = datetime.utcnow().isoformat()
+
+        success = submit_exam_response(data.dict())
+
+        if success:
+            return JSONResponse(content={"status": "ok", "message": "Kayıt başarıyla tamamlandı."})
+        else:
+            return JSONResponse(content={"status": "error", "message": "Supabase kayıt hatası."})
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Geçersiz veri: {e}")
+ckend
