@@ -18,15 +18,15 @@ def submit_exam_response(form_data: dict) -> bool:
     try:
         # form_data içinden gerekli alanları ayıklıyoruz
         payload = {
-            "exam_key": form_data.get("exam_key"),
-            "exam_name": form_data.get("exam_name"),
-            "group": form_data.get("group"),
-            "ad_soyad": form_data.get("form_data", {}).get("ad_soyad"),
-            "ogr_no": form_data.get("form_data", {}).get("ogr_no"),
-            "email": form_data.get("form_data", {}).get("email"),
-            "sinif": form_data.get("form_data", {}).get("sinif"),
-            "form_data": form_data.get("form_data"),
-            "created_at": form_data.get("created_at"),
+            "exam_key": form_data.get("exam_key", ""),
+            "exam_name": form_data.get("exam_name", ""),
+            "group": form_data.get("group", ""),
+            "ad_soyad": form_data.get("form_data", {}).get("ad_soyad", ""),
+            "ogr_no": form_data.get("form_data", {}).get("ogr_no", ""),
+            "email": form_data.get("form_data", {}).get("email", ""),
+            "sinif": form_data.get("form_data", {}).get("sinif", ""),
+            "form_data": form_data.get("form_data", {}),
+            "created_at": form_data.get("created_at", datetime.utcnow().isoformat()),
         }
 
         response = requests.post(SUPABASE_URL, headers=headers, json=payload)
